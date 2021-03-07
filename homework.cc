@@ -1,86 +1,80 @@
 #include "homework.hh"
 
 
-justAnInt &justAnInt :: operator+=								(const someType &rightHandSide) {
-	att_value += rightHandSide;
+/*
+HAL HAL HAL HAL HAL HAL HAL
+HAL   QUESTIONS 1 - 2   HAL
+HAL HAL HAL HAL HAL HAL HAL
+*/
+
+justAnInt &justAnInt :: operator+=			(const justAnInt &rightHandSide) {
+	att_value += rightHandSide.att_value;
+	return *this;
 }
 
-template<typename someType> justAnInt &justAnInt :: operator+=	(const someType &rightHandSide) {
-	att_value += rightHandSide;
+justAnInt &justAnInt :: operator-=			(const justAnInt &rightHandSide) {
+	att_value -= rightHandSide.att_value;
+	return *this;
 }
 
-template<typename someType> justAnInt justAnInt :: operator+	(const someType &rightHandSide) const {
-	justAnInt localCopy(*self);
-	return localCopy += rightHandSide;
+justAnInt &justAnInt :: operator*=			(const justAnInt &rightHandSide) {
+	att_value *= rightHandSide.att_value;
+	return *this;
 }
 
-template<typename someType> justAnInt operator+					(const someType &leftHandSide, const justAnInt &rightHandSide) const {
-	justAnInt localCopy(rightHandSide);
-	return localCopy += leftHandSide;	
+justAnInt &justAnInt :: operator/=			(const justAnInt &rightHandSide) {
+	att_value /= rightHandSide.att_value;
+	return *this;
+}
+
+bool justAnInt :: operator==				(const justAnInt &rightHandSide) const {
+	return att_value == rightHandSide.att_value;
+}
+
+bool justAnInt :: operator!=				(const justAnInt &rightHandSide) const {
+	return att_value != rightHandSide.att_value;
+}
+
+bool justAnInt :: operator>					(const justAnInt &rightHandSide) const {
+	return att_value > rightHandSide.att_value;
+}
+
+bool justAnInt :: operator>=				(const justAnInt &rightHandSide) const {
+	return att_value >= rightHandSide.att_value;
+}
+
+bool justAnInt :: operator<					(const justAnInt &rightHandSide) const {
+	return att_value < rightHandSide.att_value;
+}
+
+bool justAnInt :: operator<=				(const justAnInt &rightHandSide) const {
+	return att_value <= rightHandSide.att_value;
+}
+
+justAnInt &justAnInt :: operator=			(const justAnInt &rightHandSide) {
+	att_value = rightHandSide.att_value;
+	return *this;
+}
+
+justAnInt :: justAnInt						(const justAnInt &rightHandSide) {
+	att_value = rightHandSide.att_value;
+}
+
+justAnInt :: justAnInt						() {
+	att_value = 0;
+}
+
+justAnInt :: operator bool					() const {
+	return att_value;
 }
 
 
-justAnInt &justAnInt :: operator-=								(const justAnInt &rightHandSide) {
-	att_value -= rightHandSide;
-}
-
-template<typename someType> justAnInt &justAnInt :: operator-=	(const someType &rightHandSide) {
-	justAnInt localCopy(*self);
-	return localCopy -= rightHandSide;
-}
-
-template<typename someType> justAnInt justAnInt :: operator-	(const someType &rightHandSide) const {
-	justAnInt localCopy(rightHandSide);
-	return localCopy -= leftHandSide;	
-}
-
-template<typename someType> justAnInt operator-					(const someType &leftHandSide, const justAnInt &rightHandSide) const {
-	justAnInt localCopy(rightHandSide);
-	return localCopy -= leftHandSide;	
-}
 
 
-justAnInt &operator*=											(const justAnInt &rightHandSide) {
-	att_value *= rightHandSide;
-}
-
-template<typename someType> justAnInt &justAnInt :: operator*=	(const someType &rightHandSide) {
-	att_value *= rightHandSide;
-}
-
-template<typename someType> justAnInt justAnInt :: operator*	(const someType &rightHandSide) const {
-	justAnInt localCopy(*self);
-	return localCopy *= rightHandSide;
-}
-
-template<typename someType> justAnInt operator*					(const someType &leftHandSide, const justAnInt &rightHandSide) const {
-	justAnInt localCopy(rightHandSide);
-	return localCopy *= leftHandSide;	
-}
-
-
-justAnInt &operator/=											(const someType &rightHandSide) {
-	att_value /= rightHandSide;	
-}
-
-template<typename someType> justAnInt &justAnInt :: operator/=	(const someType &rightHandSide) {
-	att_value /= rightHandSide;	
-}
-
-template<typename someType> justAnInt justAnInt :: operator/	(const someType &rightHandSide) const {
-	justAnInt localCopy(*self);
-	return localCopy /= rightHandSide;
-}
-
-template<typename someType> justAnInt operator/					(const someType &leftHandSide, const justAnInt &rightHandSide) const {
-	justAnInt localCopy(rightHandSide);
-	return localCopy /= leftHandSide;	
-}
-
-justAnInt justAnInt :: extendedEuclidean(justAnInt a, justAnInt b, justAnInt *u0, justAnInt *v0, bool wantATrace) {
+int64_t justAnInt :: extendedEuclidean(justAnInt a, justAnInt b, justAnInt *u0, justAnInt *v0, bool wantATrace) {
 	bool needToClearU(false), needToClearV(false);
 	if (wantATrace) {
-		std :: cout.setf(ios :: left); /* Text left justified */
+		std :: cout.setf(std :: ios :: left); /* Text left justified */
 		std :: cout.width(13);	std :: cout << "a";
 		std :: cout.width(13);	std :: cout << "b";
 		std :: cout.width(13);	std :: cout << "u";
@@ -91,7 +85,7 @@ justAnInt justAnInt :: extendedEuclidean(justAnInt a, justAnInt b, justAnInt *u0
 			if (b > a) {
 				{
 					justAnInt *tmpSwap(u0);
-					u0 = v0:
+					u0 = v0;
 					v0 = tmpSwap;
 				}
 				{
@@ -121,79 +115,71 @@ justAnInt justAnInt :: extendedEuclidean(justAnInt a, justAnInt b, justAnInt *u0
 		tmp = u1; u1 = *u0 - rest * u1; *u0 = tmp;
 		tmp = v1; v1 = *v0 - rest * v1; *v0 = tmp;
 		if (wantATrace) {
-			std :: cout.width(13);	std :: cout << a.toStr();
-			std :: cout.width(13);	std :: cout << b.toStr();
-			std :: cout.width(13);	std :: cout << *u0.toStr();
-			std :: cout.width(13);	std :: cout << *v0.toStr() << std :: endl;			
+			std :: cout.width(13);	std :: cout << a.	toStr();
+			std :: cout.width(13);	std :: cout << b.	toStr();
+			std :: cout.width(13);	std :: cout << u0->	toStr();
+			std :: cout.width(13);	std :: cout << v0->	toStr() << std :: endl;			
 		}
 	}
 	if (needToClearU)
 		delete u0;
 	if (needToClearV)
 		delete v0;
-	return a;
+	return a.att_value;
 }
 
 
-intModulo intModulo :: extendedEuclidean(intModulo a, intModulo b, intModulo *u0, intModulo *v0, bool wantATrace = true) {
-	bool needToClearU(false), needToClearV(false);
-	if (wantATrace) {
-		std :: cout.setf(ios :: left); /* Text left justified */
-		std :: cout.width(13);	std :: cout << "a";
-		std :: cout.width(13);	std :: cout << "b";
-		std :: cout.width(13);	std :: cout << "u";
-		std :: cout.width(13);	std :: cout << "v" << std :: endl;
-	}
-	if (!u0) {
-		needToClearV = true;
-		v0 = new justAnInt;
-	}
-	if (!v0) {
-		needToClearU = true;
-		v0 = new justAnInt;
-	}
 
-	if (b > a) {
-		{
-			justAnInt *tmpSwap(u0);
-			u0 = v0:
-			v0 = tmpSwap;
-		}
-		{
-			justAnInt tmpSwap(a);
-			a = b;
-			b = tmpSwap;
-		}
-	}
+/*
+HAL HAL HAL HAL HAL HAL
+HAL   QUESTION  3   HAL
+HAL HAL HAL HAL HAL HAL
+*/
 
-	*v0 = 0;
-	*u0 = 1;
-	justAnInt u1 = 0;
-	justAnInt v1 = 1;
-	justAnInt tmp, rest;
-	while (b) {
-		rest = a / b;
-		tmp = b; b = a - rest * b; a = tmp;
-		tmp = u1; u1 = *u0 - rest * u1; *u0 = tmp;
-		tmp = v1; v1 = *v0 - rest * v1; *v0 = tmp;
-		if (wantATrace) {
-			std :: cout.width(13);	std :: cout << a.toStr();
-			std :: cout.width(13);	std :: cout << b.toStr();
-			std :: cout.width(13);	std :: cout << *u0.toStr();
-			std :: cout.width(13);	std :: cout << *v0.toStr() << std :: endl;			
-		}
-	}
-	if (needToClearU)
-		delete u0;
-	if (needToClearV)
-		delete v0;
-	return a;
+intModulo &intModulo :: operator+= (const intModulo &rightHandSide) {
+	att_value += rightHandSide.att_value;
+	att_value %= intModulo :: att_modulo;
+	return *this;
 }
 
-intModulo intModulo :: modInv() {
-	intModulo inverse(0);
-	extendedEuclidean(att_modulo, att_value, NULL, &inverse);
-	return inverse;
+intModulo &intModulo :: operator-= (const intModulo &rightHandSide) {
+	att_value += att_value > rightHandSide.att_value ? 0 : att_modulo; /* We do not want to go negative */
+	att_value -= rightHandSide.att_value;
+	return *this;
+}
+
+intModulo &intModulo :: operator*= (const intModulo &rightHandSide) {
+	bigInt localValue(att_value);
+	localValue *= rightHandSide.att_value;
+	att_value = localValue % intModulo :: att_modulo;
+	return *this;
+}
+
+intModulo &intModulo :: operator/= (const intModulo &rightHandSide) {
+	intModulo divider(rightHandSide.modInv());
+	return *this *= divider;
+}
+
+intModulo :: intModulo				(const intModulo &rightHandSide) {
+	att_value = rightHandSide.att_value;
+}
+
+intModulo :: intModulo				() {
+	att_value = 0;
+}
+
+intModulo :: operator bool	() const {
+	return att_value;
+}
+
+intModulo intModulo :: modInv() const {
+	justAnInt inverse(0);
+	if (justAnInt :: extendedEuclidean(justAnInt(att_modulo), justAnInt(att_value), NULL, &inverse, false) != 1) {
+		justAnInt :: extendedEuclidean(justAnInt(att_modulo), justAnInt(att_value), NULL, NULL, true); /* Let us print our result */
+		std :: cout << std :: endl << std :: endl << "The modulo you chose was not prime with that value, could not invert it" << std :: endl;
+		exit(1);
+	}
+	return intModulo(inverse.giveValue());
 }
 
 
