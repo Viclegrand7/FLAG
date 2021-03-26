@@ -3,7 +3,6 @@
 
 #include "KICV_ELLD_3.hh"
 #include <iostream>
-#include <string>
 #include <vector>
 
 /*
@@ -24,8 +23,8 @@ public:
 	polynomeModulo modInv										() const;
 	static void changeModulo									(const std :: vector <intModulo>&);
 /* Operator [] */
-	intModulo &operator[]										(unsigned int position)			{return att_value[position];}
-	intModulo  operator[]										(unsigned int position) const 	{return att_value[position];}
+	intModulo &operator[]										(unsigned int position);
+	intModulo  operator[]										(unsigned int position) 				const;
 /* Operator + */
 	polynomeModulo &operator+= 									(const polynomeModulo &rightHandSide);
 	polynomeModulo &operator+= 									(const std :: vector <intModulo> &rightHandSide);
@@ -107,6 +106,7 @@ public:
 	friend std :: ostream &operator<<							(std :: ostream &out,					const polynomeModulo &rightHandSide);
 /* Constructors */
 	template<typename someType> polynomeModulo					(const someType &rightHandSide);
+	template<typename someType> polynomeModulo					(const std :: initializer_list <someType> &rightHandSide);
 	polynomeModulo												(const polynomeModulo &rightHandSide);
 	polynomeModulo												(const std :: vector <intModulo> &rightHandSide);
 	polynomeModulo												();
@@ -118,6 +118,7 @@ template<typename someType> polynomeModulo &polynomeModulo :: operator+= 	(const
 		return *this;
 	}
 	att_value.push_back(rightHandSide);
+	return *this;
 }
 
 template<typename someType> polynomeModulo polynomeModulo :: operator+ 		(const someType &rightHandSide) const {
@@ -299,9 +300,11 @@ template<typename someType> auto operator<=>								(const someType &leftHandSid
 }
 #endif /* _cplusplus >= 201907L */
 
-template<typename someType> polynomeModulo :: polynomeModulo 				(const someType &rightHandSide) {
-	att_value.clear();
-	att_value.push_back(rightHandSide);
+template<typename someType> polynomeModulo :: polynomeModulo 				(const someType &rightHandSide) : att_value(rightHandSide) {}
+
+template<typename someType> polynomeModulo :: polynomeModulo				(const std :: initializer_list <someType> &rightHandSide) {
+	for (auto it = rightHandSide.begin() ; it != rightHandSide.end() ; ++it)
+		att_value.push_back(*it);
 }
 
 

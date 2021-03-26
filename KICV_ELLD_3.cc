@@ -143,7 +143,7 @@ intModulo intModulo :: quotient		(const intModulo &rightHandSide) 	const {
 
 intModulo intModulo :: modInv		() const {
 	intModulo inverse(0);
-	if (intModulo :: extendedEuclidean(intModulo(att_modulo), intModulo(att_value), NULL, &inverse, false) != 1) {
+	if (intModulo :: extendedEuclidean(intModulo(att_modulo), intModulo(att_value), NULL, &inverse, false) != (smallInt) 1) {
 		std :: cout << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl 
 				<< "The modulo you chose was not prime with that value, could not invert it" << std :: endl
 				<< "Now generating certificate, being the trace of the Extended Euclidean algorithm" << std :: endl;
