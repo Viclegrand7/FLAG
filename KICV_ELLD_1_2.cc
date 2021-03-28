@@ -11,9 +11,21 @@ justAnInt &justAnInt :: operator+=			(const justAnInt &rightHandSide) {
 	return *this;
 }
 
+justAnInt justAnInt :: operator+			(const justAnInt &rightHandSide) {
+	justAnInt localValue(*this);
+	localValue.att_value += rightHandSide.att_value;
+	return localValue;
+}
+
 justAnInt &justAnInt :: operator-=			(const justAnInt &rightHandSide) {
 	att_value -= rightHandSide.att_value;
 	return *this;
+}
+
+justAnInt justAnInt :: operator-			(const justAnInt &rightHandSide) {
+	justAnInt localValue(*this);
+	localValue.att_value -= rightHandSide.att_value;
+	return localValue;
 }
 
 justAnInt justAnInt :: operator-			() const {
@@ -27,8 +39,25 @@ justAnInt &justAnInt :: operator*=			(const justAnInt &rightHandSide) {
 	return *this;
 }
 
+justAnInt justAnInt :: operator*			(const justAnInt &rightHandSide) {
+	justAnInt localValue(*this);
+	localValue.att_value *= rightHandSide.att_value;
+	return localValue;
+}
+
 justAnInt &justAnInt :: operator/=			(const justAnInt &rightHandSide) {
 	att_value /= rightHandSide.att_value;
+	return *this;
+}
+
+justAnInt justAnInt :: operator/			(const justAnInt &rightHandSide) {
+	justAnInt localValue(*this);
+	localValue.att_value /= rightHandSide.att_value;
+	return localValue;
+}
+
+justAnInt &justAnInt :: operator=			(const justAnInt &rightHandSide) {
+	att_value = rightHandSide.att_value;
 	return *this;
 }
 
@@ -56,10 +85,10 @@ bool justAnInt :: operator<=				(const justAnInt &rightHandSide) const {
 	return att_value <= rightHandSide.att_value;
 }
 
-justAnInt &justAnInt :: operator=			(const justAnInt &rightHandSide) {
-	att_value = rightHandSide.att_value;
-	return *this;
+std :: ostream &operator<<			(std :: ostream &out,				const justAnInt &rightHandSide) {
+	return out << rightHandSide.toStr();
 }
+
 
 justAnInt :: justAnInt						(const justAnInt &rightHandSide)	: att_value(rightHandSide.att_value) {}
 
@@ -81,31 +110,33 @@ int64_t justAnInt :: extendedEuclidean(justAnInt a, justAnInt b, justAnInt *u0, 
 		std :: cout.width(13);	std :: cout << "u";
 		std :: cout.width(13);	std :: cout << "v" << std :: endl;
 	}
-	if (u0) {
-		if (v0) {
-			if (b > a) {
-				{
-					justAnInt *tmpSwap(u0);
-					u0 = v0;
-					v0 = tmpSwap;
-				}
-				{
-					justAnInt tmpSwap(a);
-					a = b;
-					b = tmpSwap;
-				}
-			}
-			else {
-				needToClearV = true;
-				v0 = new justAnInt;
-			}
-			*v0 = 0;
+	if (!u0) {
+		needToClearU = true;
+		u0 = new justAnInt;
+	}
+	if (!v0) {
+		needToClearV = true;
+		v0 = new justAnInt;
+	}
+	if (b > a) {
+		{
+			justAnInt *tmpSwap(u0);
+			u0 = v0;
+			v0 = tmpSwap;
 		}
-		else {
-			needToClearU = true;
-			v0 = new justAnInt;
+		{
+			justAnInt tmpSwap(a);
+			a = b;
+			b = tmpSwap;
 		}
-		*u0 = 1;
+	}
+	*u0 = 1;
+	*v0 = 0;
+	if (wantATrace) {
+		std :: cout.width(13);	std :: cout << a.	toStr();
+		std :: cout.width(13);	std :: cout << b.	toStr();
+		std :: cout.width(13);	std :: cout << u0->	toStr();
+		std :: cout.width(13);	std :: cout << v0->	toStr() << std :: endl;			
 	}
 	justAnInt u1 = 0;
 	justAnInt v1 = 1;
@@ -122,6 +153,8 @@ int64_t justAnInt :: extendedEuclidean(justAnInt a, justAnInt b, justAnInt *u0, 
 			std :: cout.width(13);	std :: cout << v0->	toStr() << std :: endl;			
 		}
 	}
+	if (wantATrace)
+		std :: cout << std :: endl << std :: endl;
 	if (needToClearU)
 		delete u0;
 	if (needToClearV)

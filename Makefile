@@ -1,4 +1,4 @@
-BIN := KICV_ELLD
+BIN := KICV_ELLD.exe
 
 
 CC := g++
@@ -7,30 +7,41 @@ CFLAGS = -std=c++2a -g -Wall -Werror -Wshadow -Wunreachable-code \
  -I /usr/include
 RLSFLAGS = -std=c++2a -m64 -O3 -DNDEBUG -I /usr/include
 
+DEPFLAGS = -MT $@ -MMD -MP -MF $*.Td
+POSTCOMPILE = mv -f $*.Td $*.d && touch $@
+
 DBGFLAG := $(filter test, $(MAKECMDGOALS))
 REALFLAGS = $(if $(DBGFLAG), $(CFLAGS), $(RLSFLAGS))
 
-OBJ = $(patsubst %.cc, %.o, $(wildcard *.cc))
+OBJ 	 = $(filter-out testcase.o, $(patsubst %.cc, %.o, $(wildcard *.cc)))
+OBJ_TEST = $(filter-out main.o, $(patsubst %.cc, %.o, $(wildcard *.cc)))
 
-COMPILE = $(CC) $(REALFLAGS) $(TARGET_ARCH) -c
+COMPILE = $(CC) $(REALFLAGS) $(DEPFLAGS) $(TARGET_ARCH) -c
 
 all : $(BIN)
 
 $(BIN) : $(OBJ)
-	$(CC) $(REALFLAGS) $^ $(ENGOBJ) $(LDLIBS) -o $@
+	$(CC) $(REALFLAGS) $^ $(LDLIBS) -o $@
 
-%.o : %.cc
+%.o : %.cc %.d
 	$(COMPILE) -o $@ $<
+	$(POSTCOMPILE)
+
+
+DEPFILES := $(OBJ:%.o=%.d) testcase.d
+$(DEPFILES):
+include $(wildcard $(DEPFILES))
 
 .PHONY : clean test debug love all 
 
 debug : REALFLAGS = $(CFLAGS) 
 debug : $(BIN)
 
-
+testcase: $(OBJ_TEST)
+	$(CC) $(REALFLAGS) $^ $(LDLIBS) -o $@.exe
 
 clean : 
-	rm -f $(BIN) $(OBJ)
+	rm -f $(BIN) $(OBJ) testcase.exe testcase.o
 	
 love : 
 	@echo "not war"

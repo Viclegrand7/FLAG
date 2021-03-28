@@ -20,7 +20,7 @@ intModulo operator+ 				(const intModulo &leftHandSide, const intModulo &rightHa
 }
 
 intModulo &intModulo :: operator-= 	(const intModulo &rightHandSide) {
-	att_value += att_value > rightHandSide.att_value ? 0 : att_modulo; /* We do not want to go negative */
+	att_value += att_value >= rightHandSide.att_value ? 0 : att_modulo; /* We do not want to go negative */
 	att_value -= rightHandSide.att_value;
 	return *this;
 }
@@ -121,8 +121,7 @@ intModulo intModulo :: operator--	(int) {
 }
 
 std :: ostream &operator<<			(std :: ostream &out,				const intModulo &rightHandSide) {
-	out << rightHandSide.att_value;
-	return out;
+	return out << rightHandSide.att_value;
 }
 
 
@@ -134,16 +133,20 @@ intModulo :: intModulo				()									: att_value(0) {}
 intModulo intModulo :: quotient		(const intModulo &rightHandSide) 	const {
 	intModulo localValue(*this);
 	intModulo result(0);
-	while (localValue > rightHandSide) {
+	while (localValue >= rightHandSide) {
 		localValue -= rightHandSide;
 		++result;
 	}
 	return result;
 }
 
+void intModulo :: normalize() {
+	att_value %= att_modulo;
+}
+
 intModulo intModulo :: modInv		() const {
 	intModulo inverse(0);
-	if (intModulo :: extendedEuclidean(intModulo(att_modulo), intModulo(att_value), NULL, &inverse, false) != (smallInt) 1) {
+	if (intModulo :: extendedEuclidean(intModulo(att_modulo), intModulo(att_value), NULL, &inverse, true) != (smallInt) 1) {
 		std :: cout << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl 
 				<< "The modulo you chose was not prime with that value, could not invert it" << std :: endl
 				<< "Now generating certificate, being the trace of the Extended Euclidean algorithm" << std :: endl;
@@ -154,7 +157,7 @@ intModulo intModulo :: modInv		() const {
 }
 
 void intModulo :: changeModulo		(const smallInt &newValue) {
-	if (newValue >= (2 << 31)) {
+	if (newValue >= ((uint64_t) 1 << 31)) {
 		std :: cout << "Error, you entered a value too high for this work" << std :: endl;
 		return;
 	}
@@ -162,6 +165,11 @@ void intModulo :: changeModulo		(const smallInt &newValue) {
 }
 
 intModulo intModulo :: extendedEuclidean(intModulo a, intModulo b, intModulo *u0, intModulo *v0, bool wantATrace) {
+	if (!a) {
+		++att_modulo;
+		a = (att_modulo - 1);
+		--att_modulo;
+	}
 	bool needToClearU(false), needToClearV(false);
 	if (wantATrace) {
 		std :: cout.setf(std :: ios :: left); /* Text left justified */
@@ -170,31 +178,33 @@ intModulo intModulo :: extendedEuclidean(intModulo a, intModulo b, intModulo *u0
 		std :: cout.width(13);	std :: cout << "u";
 		std :: cout.width(13);	std :: cout << "v" << std :: endl;
 	}
-	if (u0) {
-		if (v0) {
-			if (b > a) {
-				{
-					intModulo *tmpSwap(u0);
-					u0 = v0;
-					v0 = tmpSwap;
-				}
-				{
-					intModulo tmpSwap(a);
-					a = b;
-					b = tmpSwap;
-				}
-			}
-			else {
-				needToClearV = true;
-				v0 = new intModulo;
-			}
-			*v0 = 0;
+	if (!u0) {
+		needToClearU = true;
+		u0 = new intModulo;
+	}
+	if (!v0) {
+		needToClearV = true;
+		v0 = new intModulo;
+	}
+	if (b > a) {
+		{
+			intModulo *tmpSwap(u0);
+			u0 = v0;
+			v0 = tmpSwap;
 		}
-		else {
-			needToClearU = true;
-			v0 = new intModulo;
+		{
+			intModulo tmpSwap(a);
+			a = b;
+			b = tmpSwap;
 		}
-		*u0 = 1;
+	}
+	*u0 = 1;
+	*v0 = 0;
+	if (wantATrace) {
+		std :: cout.width(13);	std :: cout << a;
+		std :: cout.width(13);	std :: cout << b;
+		std :: cout.width(13);	std :: cout << *u0;
+		std :: cout.width(13);	std :: cout << *v0 << std :: endl;			
 	}
 	intModulo u1 = 0;
 	intModulo v1 = 1;
@@ -205,16 +215,18 @@ intModulo intModulo :: extendedEuclidean(intModulo a, intModulo b, intModulo *u0
 		tmp = u1; u1 = *u0 - quotient * u1; *u0 = tmp;
 		tmp = v1; v1 = *v0 - quotient * v1; *v0 = tmp;
 		if (wantATrace) {
-			std :: cout.width(13);	std :: cout << a.	toStr();
-			std :: cout.width(13);	std :: cout << b.	toStr();
-			std :: cout.width(13);	std :: cout << u0->	toStr();
-			std :: cout.width(13);	std :: cout << v0->	toStr() << std :: endl;			
+			std :: cout.width(13);	std :: cout << a;
+			std :: cout.width(13);	std :: cout << b;
+			std :: cout.width(13);	std :: cout << *u0;
+			std :: cout.width(13);	std :: cout << *v0 << std :: endl;			
 		}
 	}
 	if (needToClearU)
 		delete u0;
 	if (needToClearV)
 		delete v0;
+	if (wantATrace)
+		std :: cout << std :: endl << std :: endl;
 	return a.att_value;
 }
 

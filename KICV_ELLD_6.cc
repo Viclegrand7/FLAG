@@ -430,6 +430,12 @@ void polynomeModulo :: normalize				() {
 
 polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeModulo b, polynomeModulo *u0, polynomeModulo *v0, bool wantATrace) {
 	bool needToClearU(false), needToClearV(false);
+	if (!a) {
+		att_modulo.push_back(0);
+		a.att_value = att_modulo;
+		a.att_value.pop_back();
+		att_modulo.pop_back();
+	}
 	if (wantATrace) {
 		std :: cout.setf(std :: ios :: left); /* Text left justified */
 		std :: cout.width(20);	std :: cout << "a";
@@ -437,32 +443,34 @@ polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeMod
 		std :: cout.width(20);	std :: cout << "u";
 		std :: cout.width(20);	std :: cout << "v" << std :: endl;
 	}
-	if (u0) {
-		if (v0) {
-			if (b > a) {
-				{
-					polynomeModulo *tmpSwap(u0);
-					u0 = v0;
-					v0 = tmpSwap;
-				}
-				{
-					polynomeModulo tmpSwap(a);
-					a = b;
-					b = tmpSwap;
-				}
-			}
-			else {
-				needToClearV = true;
-				v0 = new polynomeModulo;
-			}
-			*v0 = 0;
-		}
-		else {
-			needToClearU = true;
-			v0 = new polynomeModulo;
-		}
-		*u0 = 1;
+	if (!u0) {
+		needToClearU = true;
+		u0 = new polynomeModulo;
 	}
+	if (!v0) {
+		needToClearV = true;
+		v0 = new polynomeModulo;
+	}
+	if (b > a) {
+		{
+			polynomeModulo *tmpSwap(u0);
+			u0 = v0;
+			v0 = tmpSwap;
+		}
+		{
+			polynomeModulo tmpSwap(a);
+			a = b;
+			b = tmpSwap;
+		}
+	}
+	if (wantATrace) {
+		std :: cout.width(13);	std :: cout << a;
+		std :: cout.width(13);	std :: cout << b;
+		std :: cout.width(13);	std :: cout << *u0;
+		std :: cout.width(13);	std :: cout << *v0 << std :: endl;			
+	}
+	*u0 = 1;
+	*v0 = 0;
 	polynomeModulo u1 = 0;
 	polynomeModulo v1 = 1;
 	polynomeModulo tmp, quotient;
@@ -478,6 +486,8 @@ polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeMod
 			std :: cout.width(20);	std :: cout << *v0 << std :: endl;			
 		}
 	}
+	if (wantATrace)
+		std :: cout << std :: endl << std :: endl;
 	if (needToClearU)
 		delete u0;
 	if (needToClearV)

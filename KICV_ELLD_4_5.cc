@@ -429,31 +429,33 @@ polynomeOfInts polynomeOfInts :: extendedEuclidean(polynomeOfInts a, polynomeOfI
 		std :: cout.width(20);	std :: cout << "u";
 		std :: cout.width(20);	std :: cout << "v" << std :: endl;
 	}
-	if (u0) {
-		if (v0) {
-			if (b > a) {
-				{
-					polynomeOfInts *tmpSwap(u0);
-					u0 = v0;
-					v0 = tmpSwap;
-				}
-				{
-					polynomeOfInts tmpSwap(a);
-					a = b;
-					b = tmpSwap;
-				}
-			}
-			else {
-				needToClearV = true;
-				v0 = new polynomeOfInts;
-			}
-			*v0 = 0;
+	if (!u0) {
+		needToClearU = true;
+		u0 = new polynomeOfInts;
+	}
+	if (!v0) {
+		needToClearV = true;
+		v0 = new polynomeOfInts;
+	}
+	if (b > a) {
+		{
+			polynomeOfInts *tmpSwap(u0);
+			u0 = v0;
+			v0 = tmpSwap;
 		}
-		else {
-			needToClearU = true;
-			v0 = new polynomeOfInts;
+		{
+			polynomeOfInts tmpSwap(a);
+			a = b;
+			b = tmpSwap;
 		}
-		*u0 = 1;
+	}
+	*u0 = 1;
+	*v0 = 0;
+	if (wantATrace) {
+		std :: cout.width(13);	std :: cout << a;
+		std :: cout.width(13);	std :: cout << b;
+		std :: cout.width(13);	std :: cout << *u0;
+		std :: cout.width(13);	std :: cout << *v0 << std :: endl;			
 	}
 	polynomeOfInts u1 = 0;
 	polynomeOfInts v1 = 1;
@@ -470,6 +472,8 @@ polynomeOfInts polynomeOfInts :: extendedEuclidean(polynomeOfInts a, polynomeOfI
 			std :: cout.width(20);	std :: cout << *v0 << std :: endl;			
 		}
 	}
+	if (wantATrace)
+		std :: cout << std :: endl << std :: endl;
 	if (needToClearU)
 		delete u0;
 	if (needToClearV)

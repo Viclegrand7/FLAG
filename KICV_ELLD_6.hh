@@ -95,13 +95,6 @@ public:
 	template<typename someType> friend auto operator<=>			(const someType &leftHandSide,			const polynomeModulo &rightHandSide);
 #endif /* _cplusplus >= 201907L */
 
-/* Operator in/de crement */
-	/*
-	polynomeModulo &operator++									();
-	polynomeModulo &operator--									();
-	polynomeModulo operator++									(int);
-	polynomeModulo operator--									(int);
-	*/
 /* Operator << */
 	friend std :: ostream &operator<<							(std :: ostream &out,					const polynomeModulo &rightHandSide);
 /* Constructors */

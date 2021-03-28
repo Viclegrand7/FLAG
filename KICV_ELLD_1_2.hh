@@ -14,32 +14,34 @@ class justAnInt {
 /* Attributes*/
 	int64_t att_value;
 /* Methods */
-	std :: string toStr										() {return std :: to_string(att_value);}
+	std :: string toStr										() const {return std :: to_string(att_value);}
 public:
 	static int64_t extendedEuclidean						(justAnInt a, justAnInt b, justAnInt *u0, justAnInt *v0, bool wantATrace = true);
 	int64_t giveValue										() {return att_value;}
 /* Operator + */
 	justAnInt &operator+=									(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt &operator+=		(const someType &rightHandSide);
+	justAnInt operator+										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator+			(const someType &rightHandSide) 	const;
 	template<typename someType> friend justAnInt operator+	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 /* Operator - */
 	justAnInt &operator-=									(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt &operator-=		(const someType &rightHandSide);
+	justAnInt operator-										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator-			(const someType &rightHandSide) 	const;
 	template<typename someType> friend justAnInt operator-	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 	justAnInt operator-										()								 	const;
 /* Operator * */
 	justAnInt &operator*=									(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt &operator*=		(const someType &rightHandSide);
+	justAnInt operator*										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator*			(const someType &rightHandSide) 	const;
-	template<typename someType> justAnInt operator*			(const justAnInt &rightHandSide) 	const;
 	template<typename someType> friend justAnInt operator*	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 /* Operator / */
 	justAnInt &operator/=									(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt &operator/=		(const someType &rightHandSide);
+	justAnInt operator/										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator/			(const someType &rightHandSide) 	const;
-	template<typename someType> justAnInt operator/			(const justAnInt &rightHandSide) 	const;
 	template<typename someType> friend justAnInt operator/	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 /* Operator = */
 	template<typename someType> justAnInt &operator=		(const someType &rightHandSide);
@@ -61,6 +63,8 @@ public:
 	bool operator<											(const justAnInt &rightHandSide) 	const;
 	template<typename someType> bool operator<=				(const someType &rightHandSide) 	const;
 	bool operator<=											(const justAnInt &rightHandSide) 	const;
+/* Operator << */
+	friend std :: ostream &operator<<						(std :: ostream &out,				const justAnInt &rightHandSide);
 /* Constructors */
 	template<typename someType> justAnInt(const someType &rightHandSide);
 	justAnInt(const justAnInt &rightHandSide);
@@ -130,6 +134,11 @@ template<typename someType> justAnInt operator/					(const someType &leftHandSid
 }
 
 
+template<typename someType> justAnInt &justAnInt :: operator=	(const someType &rightHandSide) {
+	att_value = rightHandSide;
+	return *this;
+}
+
 template<typename someType> bool justAnInt :: operator==		(const someType &rightHandSide) const {
 	return att_value == rightHandSide;
 }
@@ -152,11 +161,6 @@ template<typename someType> bool justAnInt :: operator<			(const someType &right
 
 template<typename someType> bool justAnInt :: operator<=		(const someType &rightHandSide) const {
 	return att_value <= rightHandSide;
-}
-
-template<typename someType> justAnInt &justAnInt :: operator=	(const someType &rightHandSide) {
-	att_value = rightHandSide;
-	return *this;
 }
 
 template<typename someType> justAnInt :: justAnInt				(const someType &rightHandSide) {

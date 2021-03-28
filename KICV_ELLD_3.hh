@@ -20,12 +20,14 @@ class intModulo {
 	smallInt att_value;				/* The real value */
 	static smallInt att_modulo;		/* Modulo value. The same for everyone */
 /* Methods */
-	std :: string toStr										() const {return std :: to_string(att_value);}
+	std :: string toStr										() const 	{return std :: to_string(att_value);}
 	intModulo quotient										(const intModulo &rightHandSide) const;
 public:
+	void normalize											();
 	static intModulo extendedEuclidean						(intModulo a, intModulo b, intModulo *u0, intModulo *v0, bool wantATrace = true);
 	intModulo modInv										() const;
 	static void changeModulo								(const smallInt &);
+	static smallInt giveModulo								()			{return att_modulo;}
 /* Operator + */
 	intModulo &operator+= 									(const intModulo &rightHandSide);
 	template<typename someType> intModulo &operator+= 		(const someType &rightHandSide);
@@ -100,8 +102,9 @@ public:
 
 template<typename someType> intModulo &intModulo :: operator+= (const someType &rightHandSide) {
 	if (rightHandSide >= 0) {
-		rightHandSide %= att_modulo; /* Making sure we do not overflow */
-		att_value += rightHandSide;
+		bigInt localCopy(rightHandSide);
+		localCopy %= att_modulo; /* Making sure we do not overflow */
+		att_value += localCopy;
 		att_value %= att_modulo;	
 		return *this;		
 	}
@@ -131,9 +134,10 @@ template<typename someType> intModulo operator+ (const someType &leftHandSide, c
 
 template<typename someType> intModulo &intModulo :: operator-= (const someType &rightHandSide) {
 	if (rightHandSide >= 0) {
-		rightHandSide %= att_modulo; /* Making sure we do not try to overflow */
-		att_value += att_value > rightHandSide.att_value ? 0 : att_modulo; /* We do not want to go negative */
-		att_value -= rightHandSide.att_value;
+		bigInt localCopy(rightHandSide);
+		localCopy %= att_modulo; /* Making sure we do not try to overflow */
+		att_value += att_value >= localCopy ? 0 : att_modulo; /* We do not want to go negative */
+		att_value -= localCopy;
 		return *this;		
 	}
 	return *this += (- rightHandSide); /* Substracting negative <=> adding positive */
@@ -152,10 +156,8 @@ template<typename someType> intModulo operator- (const someType &leftHandSide, c
 
 template<typename someType> intModulo &intModulo :: operator*= (const someType &rightHandSide) {
 	if (rightHandSide >= 0) {
-		rightHandSide %= att_modulo; /* Making sure we do not overflow */
-
 		bigInt localValue(att_value);
-		localValue *= rightHandSide;
+		localValue *= (rightHandSide % att_modulo);
 		att_value = localValue % att_modulo;
 		return *this;		
 	}
@@ -183,12 +185,16 @@ template<typename someType> intModulo operator* (const someType &leftHandSide, c
 
 
 template<typename someType> intModulo &intModulo :: operator/= (const someType &rightHandSide) {
-	std :: cout << rightHandSide < 0 ? "Not YET\n" : "";
-	rightHandSide %= att_modulo; /* Making sure we can do our stuff */
-
-
-	intModulo divider(rightHandSide); /* Just a mere cast for now */
-	divider = divider.modInv(); /*There we actually inverted it */
+	if (rightHandSide > 0) {
+		intModulo divider(rightHandSide);
+		divider = divider.modInv();
+		return *this *= divider;
+	}
+	int64_t localCopy(rightHandSide);
+	localCopy %= att_modulo;
+	localCopy += att_modulo;
+	intModulo divider(localCopy);
+	divider = divider.modInv();
 	return *this *= divider;
 }
 
@@ -203,70 +209,70 @@ template<typename someType> intModulo operator/ (const someType &leftHandSide, c
 }
 
 template<typename someType> intModulo &intModulo :: operator=	(const someType &rightHandSide) {
-	att_value = rightHandSide;
+	att_value = rightHandSide % att_modulo;
 	return *this;
 }
 
 template<typename someType> bool intModulo :: operator==		(const someType &rightHandSide) const {
-	return att_value == rightHandSide;
+	return att_value == intModulo(rightHandSide).att_value;
 }
 
 template<typename someType> bool operator==						(const someType &leftHandSide,	const intModulo &rightHandSide) {
-	return rightHandSide.att_value == leftHandSide;
+	return rightHandSide.att_value == intModulo(leftHandSide).att_value;
 }
 
 template<typename someType> bool intModulo :: operator!=		(const someType &rightHandSide) const {
-	return att_value != rightHandSide;
+	return att_value != intModulo(rightHandSide).att_value;
 }
 
 template<typename someType> bool operator!=						(const someType &leftHandSide,	const intModulo &rightHandSide) {
-	return rightHandSide.att_value != leftHandSide;
+	return rightHandSide.att_value != intModulo(leftHandSide).att_value;
 }
 
 template<typename someType> bool intModulo :: operator>			(const someType &rightHandSide) const {
-	return att_value > rightHandSide;
+	return att_value > intModulo(rightHandSide).att_value;
 }
 
 template<typename someType> bool operator>						(const someType &leftHandSide,	const intModulo &rightHandSide) {
-	return leftHandSide > rightHandSide.att_value;
+	return intModulo(leftHandSide).att_value > rightHandSide.att_value;
 }
 
 template<typename someType> bool intModulo :: operator>=		(const someType &rightHandSide) const {
-	return att_value >= rightHandSide;
+	return att_value >= intModulo(rightHandSide).att_value;
 }
 
 template<typename someType> bool operator>=						(const someType &leftHandSide,	const intModulo &rightHandSide) {
-	return leftHandSide >= rightHandSide.att_value;
+	return intModulo(leftHandSide).att_value >= rightHandSide.att_value;
 }
 
 template<typename someType> bool intModulo :: operator<			(const someType &rightHandSide) const {
-	return att_value < rightHandSide;
+	return att_value < intModulo(rightHandSide).att_value;
 }
 
 template<typename someType> bool operator<						(const someType &leftHandSide,	const intModulo &rightHandSide) {
-	return leftHandSide < rightHandSide.att_value;
+	return intModulo(leftHandSide).att_value < rightHandSide.att_value;
 }
 
 template<typename someType> bool intModulo :: operator<=		(const someType &rightHandSide) const {
-	return att_value <= rightHandSide;
+	return att_value <= intModulo(rightHandSide).att_value;
 }
 
 template<typename someType> bool operator<=						(const someType &leftHandSide,	const intModulo &rightHandSide) {
-	return leftHandSide <= rightHandSide.att_value;
+	return intModulo(leftHandSide).att_value <= rightHandSide.att_value;
 }
 
 #if _cplusplus >= 201907L
 	template<typename someType> auto intModulo :: operator<=>		(const someType &rightHandSide)	const {
-		return att_value <=> rightHandSide;
+		return att_value <=> intModulo(rightHandSide).att_value;
 	}
 
 	template<typename someType> auto operator<=>					(const someType &leftHandSide,	const intModulo &rightHandSide) {
-		return leftHandSide <=> rightHandSide.att_value;
+		return intModulo(leftHandSide).att_value <=> rightHandSide.att_value;
 	}
 #endif /* _cplusplus >= 201907L */
 
 template<typename someType> intModulo :: intModulo				(const someType &rightHandSide) {
-	if (rightHandSide > 0)
+	if (rightHandSide >= 0)
 		att_value = rightHandSide % att_modulo;
 	else 
 		att_value = att_modulo - (rightHandSide % att_modulo);
