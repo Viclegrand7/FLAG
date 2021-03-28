@@ -8,6 +8,17 @@ HAL HAL HAL HAL HAL HAL
 
 std :: vector <intModulo> polynomeModulo :: att_modulo{1, 2 << 29};
 
+std :: string polynomeModulo :: toString						()													const {
+	std :: string result("");
+	if (att_value.size())
+		result += std :: to_string(att_value[0].giveValue());
+	if (att_value.size() > 1)
+		result += " + " + std :: to_string(att_value[1].giveValue()) + "x";
+	for (unsigned int i = 2 ; i < att_value.size() ; ++i)
+		result += " + " + std :: to_string(att_value[i].giveValue()) + "x^" + std :: to_string(i);
+	return result;
+}
+
 intModulo &polynomeModulo :: operator[]							(unsigned int position) {
 	if (position < att_value.size())
 		return att_value[position];
@@ -85,51 +96,27 @@ polynomeModulo polynomeModulo :: operator-		() const {
 }
 
 polynomeModulo &polynomeModulo :: operator*=	(const polynomeModulo &rightHandSide) {
-	unsigned int maximumExponent(att_value.size() + rightHandSide.att_value.size());
-	std :: vector <intModulo> localCopy(att_value); /* We will make a copy, just because it is easier */
+	unsigned int maximumExponent(att_value.size() + rightHandSide.att_value.size() - 1);
+	std :: vector <intModulo> localValue(0);
+	while(localValue.size() < maximumExponent)
+		localValue.push_back(0);
 	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
-		att_value[i] = 0;							/* Reset our vector. Might be faster to make the copy the right size with full 0s and copy after */
-	while (att_value.size() < maximumExponent)
-		att_value.push_back(0);						/* Get the right size in our this */
-	if (localCopy.size() < rightHandSide.att_value.size()) {
-		for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-			for (unsigned int j = localCopy.size() ; j > 0 ;) {
-				--j;
-				att_value[i] += localCopy[j] * rightHandSide.att_value[i - j]; /* Careful, we move j HERE, in the first */
-			}
-		normalize();
-		return *this;
-	}
-	for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-		for (unsigned int j = rightHandSide.att_value.size() ; j > 0 ;) {
-			--j;
-			att_value[i] += localCopy[i - j] * rightHandSide.att_value[j];
-		}
+		for (unsigned int j = 0 ; j < rightHandSide.att_value.size() ; ++j)
+			localValue[i + j] += att_value[i] * rightHandSide.att_value[j];
+	att_value = localValue;
 	normalize();
 	return *this;
 }
 
 polynomeModulo &polynomeModulo :: operator*=	(const std :: vector <intModulo> &rightHandSide) {
-	unsigned int maximumExponent(att_value.size() + rightHandSide.size());
-	std :: vector <intModulo> localCopy(att_value); /* We will make a copy, just because it is easier */
+	unsigned int maximumExponent(att_value.size() + rightHandSide.size() - 1);
+	std :: vector <intModulo> localValue(0);
+	while(localValue.size() < maximumExponent)
+		localValue.push_back(0);
 	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
-		att_value[i] = 0;							/* Reset our vector. Might be faster to make the copy the right size with full 0s and copy after */
-	while (att_value.size() < maximumExponent)
-		att_value.push_back(0);						/* Get the right size in our this */
-	if (localCopy.size() < rightHandSide.size()) {
-		for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-			for (unsigned int j = localCopy.size() ; j > 0 ;) {
-				--j;
-				att_value[i] += localCopy[j] * rightHandSide[i - j]; /* Careful, we move j HERE, in the first */
-			}
-		normalize();
-		return *this;
-	}
-	for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-		for (unsigned int j = rightHandSide.size() ; j > 0 ;) {
-			--j;
-			att_value[i] += localCopy[i - j] * rightHandSide[j];
-		}
+		for (unsigned int j = 0 ; j < rightHandSide.size() ; ++j)
+			localValue[i + j] += att_value[i] * rightHandSide[j];
+	att_value = localValue;
 	normalize();
 	return *this;
 }
@@ -157,12 +144,6 @@ polynomeModulo operator/ 						(const polynomeModulo &leftHandSign, 				const po
 
 polynomeModulo& polynomeModulo :: operator= 	(const polynomeModulo &rightHandSide) {
 	att_value = rightHandSide.att_value;
-	normalize();
-	return *this;
-}
-
-polynomeModulo& polynomeModulo :: operator= 	(const std :: vector <intModulo> &rightHandSide) {
-	att_value = rightHandSide;
 	normalize();
 	return *this;
 }
@@ -368,42 +349,40 @@ std :: ostream &operator<<						(std :: ostream &out,				const polynomeModulo &r
 	if (rightHandSide.att_value.size() > 1)
 		out << " + " << rightHandSide[1] << "x";
 	for (unsigned int i = 2 ; i < rightHandSide.att_value.size() ; ++i)
-		out << " + " << rightHandSide[i] << "x ^ " << i;
+		out << " + " << rightHandSide[i] << "x^" << i;
 	return out;
 }
 
 
-polynomeModulo :: polynomeModulo				(const polynomeModulo &rightHandSide)			: att_value(rightHandSide.att_value) {normalize();}
+polynomeModulo :: polynomeModulo				(const polynomeModulo &rightHandSide)			: att_value(rightHandSide.att_value) {}
 
-polynomeModulo :: polynomeModulo				(const std :: vector <intModulo> &rightHandSide): att_value(rightHandSide) {normalize();}
+polynomeModulo :: polynomeModulo				(const std :: vector <intModulo> &rightHandSide): att_value(rightHandSide) {}
 
 polynomeModulo :: polynomeModulo				()												: att_value(0) {}
 
 
 polynomeModulo polynomeModulo :: quotient		(const polynomeModulo &rightHandSide) const {
 	if (att_value.size() < rightHandSide.att_value.size())
-		return polynomeModulo();	/* The answer is 0 */
-	polynomeModulo localCopy(*this);
-	polynomeModulo result;
-	for (unsigned int i = 0 ; i < att_value.size() - rightHandSide.att_value.size() ; ++i) /* It basically is the size of the size difference */
+		return polynomeModulo();
+	polynomeModulo result(0);
+	for (unsigned int i = 0 ; i < att_value.size() - rightHandSide.att_value.size(); ++i)
 		result.att_value.push_back(0);
-	unsigned int currentExponent(result.att_value.size() - 1); 	/* To remember where we're at. It IS non zero, so non UB */
-	while (localCopy) {
-		polynomeModulo temporary;
-		for (unsigned int i = 0 ; i < currentExponent ; ++i)
-			temporary.att_value.push_back(0);
-		temporary.att_value.back() = localCopy.att_value.back() / rightHandSide.att_value.back();
-		result[currentExponent] = temporary.att_value.back();
-		localCopy -= (temporary *= rightHandSide);
+	polynomeModulo localValue(*this);
+
+	unsigned int currentExponent(result.att_value.size() - 1);
+	while (localValue.att_value.size() >= rightHandSide.att_value.size()) {
+		result[currentExponent] = localValue.att_value.back() / rightHandSide.att_value.back();
+		for (unsigned int i = 0 ; i < rightHandSide.att_value.size() ; ++i)
+			localValue[i + currentExponent] -= result[currentExponent] * rightHandSide.att_value[i];
 		--currentExponent;
-		localCopy.att_value.pop_back(); 	/* We have made sure last element was zero */
+		localValue.att_value.pop_back();
 	}
 	return result;
 }
 
 polynomeModulo polynomeModulo :: modInv			() const {
 	polynomeModulo inverse;
-	if (polynomeModulo :: extendedEuclidean(polynomeModulo(att_modulo), polynomeModulo(att_value), NULL, &inverse, false) != (smallInt) 1) {
+	if (polynomeModulo :: extendedEuclidean(polynomeModulo(att_modulo), polynomeModulo(att_value), NULL, &inverse, true) != (smallInt) 1) {
 		std :: cout << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl 
 				<< "The modulo you chose was not prime with that value, could not invert it" << std :: endl
 				<< "Now generating certificate, being the trace of the Extended Euclidean algorithm" << std :: endl;
@@ -417,9 +396,25 @@ void polynomeModulo :: changeModulo				(const std :: vector <intModulo> &newValu
 	att_modulo = newValue;
 }
 
+polynomeModulo polynomeModulo :: noNormaliseMultiply		(const polynomeModulo &rightHandSide) {
+	unsigned int maximumExponent(att_value.size() + rightHandSide.att_value.size() - 1);
+	std :: vector <intModulo> localValue(0);
+	while(localValue.size() < maximumExponent)
+		localValue.push_back(0);
+	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
+		for (unsigned int j = 0 ; j < rightHandSide.att_value.size() ; ++j)
+			localValue[i + j] += att_value[i] * rightHandSide.att_value[j];
+	att_value = localValue;
+	return *this;
+}
+
+
 void polynomeModulo :: normalize				() {
 	/* Let us first apply modulo */
-	polynomeModulo localValue(att_modulo * quotient(att_modulo));
+	polynomeModulo localValue(quotient(att_modulo));
+	if (!localValue)
+		return;
+	localValue.noNormaliseMultiply(att_modulo);
 	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
 		att_value[i] -= localValue[i];
 
@@ -438,10 +433,10 @@ polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeMod
 	}
 	if (wantATrace) {
 		std :: cout.setf(std :: ios :: left); /* Text left justified */
-		std :: cout.width(20);	std :: cout << "a";
-		std :: cout.width(20);	std :: cout << "b";
-		std :: cout.width(20);	std :: cout << "u";
-		std :: cout.width(20);	std :: cout << "v" << std :: endl;
+		std :: cout.width(30);	std :: cout << "a";
+		std :: cout.width(30);	std :: cout << "b";
+		std :: cout.width(30);	std :: cout << "u";
+		std :: cout.width(30);	std :: cout << "v" << std :: endl;
 	}
 	if (!u0) {
 		needToClearU = true;
@@ -463,27 +458,28 @@ polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeMod
 			b = tmpSwap;
 		}
 	}
-	if (wantATrace) {
-		std :: cout.width(13);	std :: cout << a;
-		std :: cout.width(13);	std :: cout << b;
-		std :: cout.width(13);	std :: cout << *u0;
-		std :: cout.width(13);	std :: cout << *v0 << std :: endl;			
-	}
 	*u0 = 1;
 	*v0 = 0;
-	polynomeModulo u1 = 0;
-	polynomeModulo v1 = 1;
+	polynomeModulo u1(0);
+	polynomeModulo v1(1);
+				std :: cout << u1.att_value.size() << " and ofc " << v1.att_value.size() << std :: endl;
 	polynomeModulo tmp, quotient;
+	if (wantATrace) {
+		std :: cout.width(30); std :: cout << a.toString();
+		std :: cout.width(30); std :: cout << b.toString();
+		std :: cout.width(30); std :: cout << u0->toString();
+		std :: cout.width(30); std :: cout << v0->toString() << std :: endl;			
+	}
 	while (b) {
-		quotient = a.quotient(b);
+		quotient = a.quotient(b);	std :: cout << "Quotient = " << quotient << std :: endl;
 		tmp = b; b = a - quotient * b; a = tmp;
 		tmp = u1; u1 = *u0 - quotient * u1; *u0 = tmp;
 		tmp = v1; v1 = *v0 - quotient * v1; *v0 = tmp;
 		if (wantATrace) {
-			std :: cout.width(20);	std :: cout << a;
-			std :: cout.width(20);	std :: cout << b;
-			std :: cout.width(20);	std :: cout << *u0;
-			std :: cout.width(20);	std :: cout << *v0 << std :: endl;			
+			std :: cout.width(30); std :: cout << a.toString();
+			std :: cout.width(30); std :: cout << b.toString();
+			std :: cout.width(30); std :: cout << u0->toString();
+			std :: cout.width(30); std :: cout << v0->toString() << std :: endl;			
 		}
 	}
 	if (wantATrace)

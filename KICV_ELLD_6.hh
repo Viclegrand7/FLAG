@@ -2,6 +2,7 @@
 #define __KICV_ELLD__FLAG_6
 
 #include "KICV_ELLD_3.hh"
+#include "KICV_ELLD_4_5.hh"
 #include <iostream>
 #include <vector>
 
@@ -17,6 +18,8 @@ class polynomeModulo {
 	static std :: vector <intModulo> att_modulo;		/* Modulo value. The same for everyone */
 /* Methods */
 	polynomeModulo quotient										(const polynomeModulo &rightHandSide) const;
+	polynomeModulo noNormaliseMultiply							(const polynomeModulo &rightHandSide);
+	std :: string toString										() const;
 public:
 	void normalize												();
 	static polynomeModulo extendedEuclidean						(polynomeModulo a, polynomeModulo b, polynomeModulo *u0, polynomeModulo *v0, bool wantATrace = true);
@@ -56,8 +59,8 @@ public:
 	template<typename someType> friend polynomeModulo operator/ (const someType &leftHandSide, 			const polynomeModulo &rightHandSide);
 /* Operator = */
 	template<typename someType> polynomeModulo &operator=		(const someType &rightHandSide);
+	template<typename someType> polynomeModulo &operator=		(const std :: initializer_list <someType> &rightHandSide);
 	polynomeModulo &operator=									(const polynomeModulo &rightHandSide);
-	polynomeModulo &operator= 									(const std :: vector <intModulo> &rightHandSide);
 /* Operator == */
 	bool operator==												(const polynomeModulo &rightHandSide)	const;
 	bool operator==			 									(const std :: vector <intModulo> &rightHandSide)								const;
@@ -142,8 +145,8 @@ template<typename someType> polynomeModulo polynomeModulo :: operator- 		(const 
 }
 
 template<typename someType> polynomeModulo operator-				 		(const someType &leftHandSide, 	const polynomeModulo rightHandSide) {
-	polynomeModulo localCopy(rightHandSide);
-	return localCopy -= leftHandSide;
+	polynomeModulo localCopy(leftHandSide);
+	return localCopy -= rightHandSide;
 }
 
 
@@ -176,14 +179,21 @@ template<typename someType> polynomeModulo polynomeModulo :: operator/ 		(const 
 }
 
 template<typename someType> polynomeModulo operator/ 						(const someType &leftHandSide, 	const polynomeModulo &rightHandSide) {
-	polynomeModulo localCopy(rightHandSide);
-	return localCopy /= leftHandSide;
+	polynomeModulo localCopy(leftHandSide);
+	return localCopy /= rightHandSide;
 }
 
 
 template<typename someType> polynomeModulo &polynomeModulo :: operator=		(const someType &rightHandSide) {
 	att_value.clear();
 	att_value.push_back(rightHandSide);
+	return *this;
+}
+
+template<typename someType> polynomeModulo &polynomeModulo :: operator=		(const std :: initializer_list <someType> &rightHandSide) {
+	for (auto it = rightHandSide.begin() ; it != rightHandSide.end() ; ++it)
+		att_value.push_back(*it);
+	normalize();
 	return *this;
 }
 
@@ -293,11 +303,15 @@ template<typename someType> auto operator<=>								(const someType &leftHandSid
 }
 #endif /* _cplusplus >= 201907L */
 
-template<typename someType> polynomeModulo :: polynomeModulo 				(const someType &rightHandSide) : att_value(rightHandSide) {}
+template<typename someType> polynomeModulo :: polynomeModulo 				(const someType &rightHandSide) {
+	att_value.push_back(rightHandSide);
+	normalize();
+}
 
 template<typename someType> polynomeModulo :: polynomeModulo				(const std :: initializer_list <someType> &rightHandSide) {
 	for (auto it = rightHandSide.begin() ; it != rightHandSide.end() ; ++it)
 		att_value.push_back(*it);
+	normalize();
 }
 
 

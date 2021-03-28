@@ -1,6 +1,7 @@
 #ifndef __KICV_ELLD__FLAG_1_2
 #define __KICV_ELLD__FLAG_1_2
 
+#include "KICV_ELLD_3.hh"
 #include <iostream>
 #include <string>
 
@@ -20,29 +21,25 @@ public:
 	int64_t giveValue										() {return att_value;}
 /* Operator + */
 	justAnInt &operator+=									(const justAnInt &rightHandSide);
+	justAnInt &operator+=									(const intModulo &rightHandSide);
 	template<typename someType> justAnInt &operator+=		(const someType &rightHandSide);
-	justAnInt operator+										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator+			(const someType &rightHandSide) 	const;
-	template<typename someType> friend justAnInt operator+	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 /* Operator - */
 	justAnInt &operator-=									(const justAnInt &rightHandSide);
+	justAnInt &operator-=									(const intModulo &rightHandSide);
 	template<typename someType> justAnInt &operator-=		(const someType &rightHandSide);
-	justAnInt operator-										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator-			(const someType &rightHandSide) 	const;
-	template<typename someType> friend justAnInt operator-	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 	justAnInt operator-										()								 	const;
 /* Operator * */
 	justAnInt &operator*=									(const justAnInt &rightHandSide);
+	justAnInt &operator*=									(const intModulo &rightHandSide);
 	template<typename someType> justAnInt &operator*=		(const someType &rightHandSide);
-	justAnInt operator*										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator*			(const someType &rightHandSide) 	const;
-	template<typename someType> friend justAnInt operator*	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 /* Operator / */
 	justAnInt &operator/=									(const justAnInt &rightHandSide);
+	justAnInt &operator/=									(const intModulo &rightHandSide);
 	template<typename someType> justAnInt &operator/=		(const someType &rightHandSide);
-	justAnInt operator/										(const justAnInt &rightHandSide);
 	template<typename someType> justAnInt operator/			(const someType &rightHandSide) 	const;
-	template<typename someType> friend justAnInt operator/	(const someType &leftHandSide, 		const justAnInt &rightHandSide);
 /* Operator = */
 	template<typename someType> justAnInt &operator=		(const someType &rightHandSide);
 	justAnInt &operator=									(const justAnInt &rightHandSide);
@@ -81,11 +78,6 @@ template<typename someType> justAnInt justAnInt :: operator+	(const someType &ri
 	return localCopy += rightHandSide;
 }
 
-template<typename someType> justAnInt operator+					(const someType &leftHandSide, const justAnInt &rightHandSide) {
-	justAnInt localCopy(rightHandSide);
-	return localCopy += leftHandSide;	
-}
-
 template<typename someType> justAnInt &justAnInt :: operator-=	(const someType &rightHandSide) {
 	att_value -= rightHandSide;
 	return *this;
@@ -95,12 +87,6 @@ template<typename someType> justAnInt justAnInt :: operator-	(const someType &ri
 	justAnInt localCopy(*this);
 	return localCopy -= rightHandSide;
 }
-
-template<typename someType> justAnInt operator-					(const someType &leftHandSide, const justAnInt &rightHandSide) {
-	justAnInt localCopy(rightHandSide);
-	return localCopy -= leftHandSide;	
-}
-
 
 template<typename someType> justAnInt &justAnInt :: operator*=	(const someType &rightHandSide) {
 	att_value *= rightHandSide;
@@ -112,12 +98,6 @@ template<typename someType> justAnInt justAnInt :: operator*	(const someType &ri
 	return localCopy *= rightHandSide;
 }
 
-template<typename someType> justAnInt operator*					(const someType &leftHandSide, const justAnInt &rightHandSide) {
-	justAnInt localCopy(rightHandSide);
-	return localCopy *= leftHandSide;	
-}
-
-
 template<typename someType> justAnInt &justAnInt :: operator/=	(const someType &rightHandSide) {
 	att_value /= rightHandSide;	
 	return *this;
@@ -127,12 +107,6 @@ template<typename someType> justAnInt justAnInt :: operator/	(const someType &ri
 	justAnInt localCopy(*this);
 	return localCopy /= rightHandSide;
 }
-
-template<typename someType> justAnInt operator/					(const someType &leftHandSide, const justAnInt &rightHandSide) {
-	justAnInt localCopy(rightHandSide);
-	return localCopy /= leftHandSide;	
-}
-
 
 template<typename someType> justAnInt &justAnInt :: operator=	(const someType &rightHandSide) {
 	att_value = rightHandSide;

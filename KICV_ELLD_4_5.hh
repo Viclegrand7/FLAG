@@ -16,6 +16,7 @@ class polynomeOfInts {
 	std :: vector <justAnInt> att_value;				/* The real values. We are using vectors */
 /* Methods */
 public:
+	unsigned int size											() const {return att_value.size();}
 	static polynomeOfInts extendedEuclidean						(polynomeOfInts a, polynomeOfInts b, polynomeOfInts *u0, polynomeOfInts *v0, bool wantATrace = true);
 /* Operator [] */
 	justAnInt &operator[]										(unsigned int position);
@@ -59,14 +60,15 @@ public:
 /* Operator = */
 	template<typename someType> polynomeOfInts &operator=		(const someType &rightHandSide);
 	polynomeOfInts &operator=									(const polynomeOfInts &rightHandSide);
-	polynomeOfInts &operator= 									(const std :: vector <justAnInt> &rightHandSide);
 /* Operator == */
 	bool operator==												(const polynomeOfInts &rightHandSide)	const;
 	bool operator==			 									(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> bool operator==					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> bool operator==					(const someType &rightHandSide) 		const;
 	template<typename someType> friend bool operator==			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 	bool operator!=												(const polynomeOfInts &rightHandSide) 	const;
 	bool operator!=			 									(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> bool operator!=					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> bool operator!=					(const someType &rightHandSide) 		const;
 	template<typename someType> friend bool operator!=			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 /* Conversion */
@@ -74,25 +76,30 @@ public:
 /* Operator > */
 	bool operator>												(const polynomeOfInts &rightHandSide)	const;
 	bool operator>			 									(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> bool operator>					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> bool operator>					(const someType &rightHandSide)			const;
 	template<typename someType> friend bool operator>			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 	bool operator>=												(const polynomeOfInts &rightHandSide) 	const;
 	bool operator>=			 									(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> bool operator>=					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> bool operator>=					(const someType &rightHandSide)		 	const;
 	template<typename someType> friend bool operator>=			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 /* Operator < */
 	bool operator<												(const polynomeOfInts &rightHandSide) 	const;
 	bool operator<			 									(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> bool operator<					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> bool operator<					(const someType &rightHandSide)	 		const;
 	template<typename someType> friend bool operator<			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 	bool operator<=												(const polynomeOfInts &rightHandSide) 	const;
 	bool operator<=			 									(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> bool operator<=					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> bool operator<=					(const someType &rightHandSide) 		const;
 	template<typename someType> friend bool operator<=			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 #if _cplusplus >= 201907L
 /* Three way comparison, the 'spaceship operator' */
 	auto operator<=>											(const polynomeOfInts &rightHandSide)	const;
 	auto operator<=>											(const std :: vector <justAnInt> &rightHandSide)								const;
+	template<typename someType> auto operator<=>					(const std :: initializer_list <someType> &rightHandSide);
 	template<typename someType> auto operator<=>				(const someType &rightHandSide)			const;
 	template<typename someType> friend auto operator<=>			(const someType &leftHandSide,			const polynomeOfInts &rightHandSide);
 #endif /* _cplusplus >= 201907L */
@@ -150,8 +157,8 @@ template<typename someType> polynomeOfInts polynomeOfInts :: operator- 		(const 
 }
 
 template<typename someType> polynomeOfInts operator-				 		(const someType &leftHandSide, 	const polynomeOfInts rightHandSide) {
-	polynomeOfInts localCopy(rightHandSide);
-	return localCopy -= leftHandSide;
+	polynomeOfInts localCopy(leftHandSide);
+	return localCopy -= rightHandSide;
 }
 
 
@@ -178,24 +185,8 @@ template<typename someType> polynomeOfInts &polynomeOfInts :: operator/= 	(const
 		att_value.push_back(0);
 		return *this;
 	}
-	polynomeOfInts localCopy(*this);
-	att_value.clear();
-	for (unsigned int i = 0 ; i <= localCopy.att_value.size() - 1 ; ++i) /* It basically is the size of the size difference */
-		att_value.push_back(0);
-	unsigned int currentExponent(att_value.size() - 1); 	/* To remember where we're at. It IS non zero, so non UB */
-	while (localCopy) {
-		polynomeOfInts temporary;
-		for (unsigned int i = 0 ; i < currentExponent ; ++i)
-			temporary.att_value.push_back(0);
-		temporary.att_value.back() = localCopy.att_value.back() / rightHandSide;
-		att_value[currentExponent] = temporary.att_value.back();
-		localCopy -= (temporary *= rightHandSide);
-		--currentExponent;
-		localCopy.att_value.pop_back(); 	/* We have made sure last element was zero */
-	}
-	while (!(att_value.back()))
-		att_value.pop_back();
-	return *this;
+	polynomeOfInts localCopy(rightHandSide);
+	return *this /= localCopy;
 }
 
 template<typename someType> polynomeOfInts polynomeOfInts :: operator/ 		(const someType &rightHandSide) const {
@@ -204,8 +195,8 @@ template<typename someType> polynomeOfInts polynomeOfInts :: operator/ 		(const 
 }
 
 template<typename someType> polynomeOfInts operator/ 						(const someType &leftHandSide, 	const polynomeOfInts &rightHandSide) {
-	polynomeOfInts localCopy(rightHandSide);
-	return localCopy /= leftHandSide;
+	polynomeOfInts localCopy(leftHandSide);
+	return localCopy /= rightHandSide;
 }
 
 
@@ -230,6 +221,26 @@ template<typename someType> polynomeOfInts &polynomeOfInts :: operator=		(const 
 	return *this;
 }
 
+template<typename someType> bool polynomeOfInts :: operator==				(const std :: initializer_list <someType> &rightHandSide) {
+	unsigned int minimumLength(att_value.size() < rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	for (unsigned int i = 0 ; i < minimumLength ; ++i)
+		if (att_value[i] != rightHandSide[i])
+			return false;
+	unsigned int maximumLength(att_value.size() > rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	if (maximumLength != minimumLength) {
+		if (maximumLength == att_value.size()) {
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (att_value[i] != 0)
+					return false;
+		}
+		else 
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (rightHandSide[i] != 0)
+					return false;
+	}
+	return true;
+}
+
 template<typename someType> bool polynomeOfInts :: operator==				(const someType &rightHandSide) const {
 	if (att_value.size() == 1)
 		return att_value[0] == rightHandSide;
@@ -239,6 +250,26 @@ template<typename someType> bool polynomeOfInts :: operator==				(const someType
 template<typename someType> bool operator==									(const someType &leftHandSide,	const polynomeOfInts &rightHandSide) {
 	if (rightHandSide.att_value.size() == 1)
 		return rightHandSide[0] == leftHandSide;
+	return false;
+}
+
+template<typename someType> bool polynomeOfInts :: operator!=				(const std :: initializer_list <someType> &rightHandSide) {
+	unsigned int minimumLength(att_value.size() < rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	for (unsigned int i = 0 ; i < minimumLength ; ++i)
+		if (att_value[i] != rightHandSide[i])
+			return true;
+	unsigned int maximumLength(att_value.size() > rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	if (maximumLength != minimumLength) {
+		if (maximumLength == att_value.size()) {
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (att_value[i] != 0)
+					return true;
+		}
+		else 
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (rightHandSide[i] != 0)
+					return true;
+	}
 	return false;
 }
 
@@ -252,6 +283,28 @@ template<typename someType> bool operator!=									(const someType &leftHandSid
 	if (rightHandSide.att_value.size() == 1)
 		return rightHandSide[0] != leftHandSide;
 	return true;
+}
+
+template<typename someType> bool polynomeOfInts :: operator>				(const std :: initializer_list <someType> &rightHandSide) {
+	unsigned int minimumLength(att_value.size() < rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	unsigned int maximumLength(att_value.size() > rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	if (maximumLength != minimumLength) {
+		if (maximumLength == att_value.size()) {
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (att_value[i] != 0)
+					return true;
+		}
+		else 
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (rightHandSide[i] != 0)
+					return false;
+	}
+	for (unsigned int i = minimumLength ; i > 0 ;) {
+		--i;
+		if (att_value[i] > rightHandSide[i])
+			return true;
+	}
+	return false;
 }
 
 template<typename someType> bool polynomeOfInts :: operator>				(const someType &rightHandSide)	const {
@@ -270,6 +323,28 @@ template<typename someType> bool operator>									(const someType &leftHandSide
 	return leftHandSide > rightHandSide[0];
 }
 
+template<typename someType> bool polynomeOfInts :: operator>=				(const std :: initializer_list <someType> &rightHandSide) {
+	unsigned int minimumLength(att_value.size() < rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	unsigned int maximumLength(att_value.size() > rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	if (maximumLength != minimumLength) {
+		if (maximumLength == att_value.size()) {
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (att_value[i] != 0)
+					return true;
+		}
+		else 
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (rightHandSide[i] != 0)
+					return false;
+	}
+	for (unsigned int i = minimumLength ; i > 0 ;) {
+		--i;
+		if (att_value[i] > rightHandSide[i])
+			return true;
+	}
+	return true;
+}
+
 template<typename someType> bool polynomeOfInts :: operator>=				(const someType &rightHandSide)	const {
 	if (att_value.size() == 1)
 		return att_value[0] >= rightHandSide;
@@ -286,6 +361,28 @@ template<typename someType> bool operator>=									(const someType &leftHandSid
 	return true;
 }
 
+template<typename someType> bool polynomeOfInts :: operator<				(const std :: initializer_list <someType> &rightHandSide) {
+	unsigned int minimumLength(att_value.size() < rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	unsigned int maximumLength(att_value.size() > rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	if (maximumLength != minimumLength) {
+		if (maximumLength == att_value.size()) {
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (att_value[i] != 0)
+					return false;
+		}
+		else 
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (rightHandSide[i] != 0)
+					return true;
+	}
+	for (unsigned int i = minimumLength ; i > 0 ;) {
+		--i;
+		if (att_value[i] < rightHandSide[i])
+			return true;
+	}
+	return false;
+}
+
 template<typename someType> bool polynomeOfInts :: operator<				(const someType &rightHandSide)	const {
 	if (att_value.size() == 1)
 		return att_value[0] < rightHandSide;
@@ -300,6 +397,28 @@ template<typename someType> bool operator<									(const someType &leftHandSide
 	if (rightHandSide.att_value.size())
 		return true;
 	return false;
+}
+
+template<typename someType> bool polynomeOfInts :: operator<=				(const std :: initializer_list <someType> &rightHandSide) {
+	unsigned int minimumLength(att_value.size() < rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	unsigned int maximumLength(att_value.size() > rightHandSide.size() ? att_value.size() : rightHandSide.size());
+	if (maximumLength != minimumLength) {
+		if (maximumLength == att_value.size()) {
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (att_value[i] != 0)
+					return false;
+		}
+		else 
+			for (unsigned int i = minimumLength ; i < maximumLength ; ++i)
+				if (rightHandSide[i] != 0)
+					return true;
+	}
+	for (unsigned int i = minimumLength ; i > 0 ;) {
+		--i;
+		if (att_value[i] < rightHandSide[i])
+			return true;
+	}
+	return true;
 }
 
 template<typename someType> bool polynomeOfInts :: operator<=				(const someType &rightHandSide) const {
@@ -319,6 +438,10 @@ template<typename someType> bool operator<=									(const someType &leftHandSid
 }
 
 #if _cplusplus >= 201907L
+template<typename someType> auto polynomeOfInts :: operator<=>				(const std :: initializer_list <someType> &rightHandSide) {
+	return att_value <=> rightHandSide;
+}
+
 template<typename someType> auto polynomeOfInts :: operator<=>				(const someType &rightHandSide)	const {
 	if (att_value.size() == 1)
 		return att_value[0] <=> rightHandSide;
@@ -336,7 +459,7 @@ template<typename someType> auto operator<=>								(const someType &leftHandSid
 }
 #endif /* _cplusplus >= 201907L */
 
-template<typename someType> polynomeOfInts :: polynomeOfInts 				(const someType &rightHandSide) : att_value() {
+template<typename someType> polynomeOfInts :: polynomeOfInts 				(const someType &rightHandSide) {
 	att_value.push_back(rightHandSide);
 }
 

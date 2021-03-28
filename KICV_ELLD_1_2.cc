@@ -11,10 +11,9 @@ justAnInt &justAnInt :: operator+=			(const justAnInt &rightHandSide) {
 	return *this;
 }
 
-justAnInt justAnInt :: operator+			(const justAnInt &rightHandSide) {
-	justAnInt localValue(*this);
-	localValue.att_value += rightHandSide.att_value;
-	return localValue;
+justAnInt &justAnInt :: operator+=			(const intModulo &rightHandSide) {
+	att_value += rightHandSide.giveValue();
+	return *this;
 }
 
 justAnInt &justAnInt :: operator-=			(const justAnInt &rightHandSide) {
@@ -22,10 +21,9 @@ justAnInt &justAnInt :: operator-=			(const justAnInt &rightHandSide) {
 	return *this;
 }
 
-justAnInt justAnInt :: operator-			(const justAnInt &rightHandSide) {
-	justAnInt localValue(*this);
-	localValue.att_value -= rightHandSide.att_value;
-	return localValue;
+justAnInt &justAnInt :: operator-=			(const intModulo &rightHandSide) {
+	att_value -= rightHandSide.giveValue();
+	return *this;
 }
 
 justAnInt justAnInt :: operator-			() const {
@@ -39,10 +37,9 @@ justAnInt &justAnInt :: operator*=			(const justAnInt &rightHandSide) {
 	return *this;
 }
 
-justAnInt justAnInt :: operator*			(const justAnInt &rightHandSide) {
-	justAnInt localValue(*this);
-	localValue.att_value *= rightHandSide.att_value;
-	return localValue;
+justAnInt &justAnInt :: operator*=			(const intModulo &rightHandSide) {
+	att_value *= rightHandSide.giveValue();
+	return *this;
 }
 
 justAnInt &justAnInt :: operator/=			(const justAnInt &rightHandSide) {
@@ -50,10 +47,9 @@ justAnInt &justAnInt :: operator/=			(const justAnInt &rightHandSide) {
 	return *this;
 }
 
-justAnInt justAnInt :: operator/			(const justAnInt &rightHandSide) {
-	justAnInt localValue(*this);
-	localValue.att_value /= rightHandSide.att_value;
-	return localValue;
+justAnInt &justAnInt :: operator/=			(const intModulo &rightHandSide) {
+	att_value /= rightHandSide.giveValue();
+	return *this;
 }
 
 justAnInt &justAnInt :: operator=			(const justAnInt &rightHandSide) {

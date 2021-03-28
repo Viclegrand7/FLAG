@@ -78,48 +78,26 @@ polynomeOfInts polynomeOfInts :: operator-		() const {
 }
 
 polynomeOfInts &polynomeOfInts :: operator*=	(const polynomeOfInts &rightHandSide) {
-	unsigned int maximumExponent(att_value.size() + rightHandSide.att_value.size());
-	std :: vector <justAnInt> localCopy(att_value); /* We will make a copy, just because it is easier */
+	unsigned int maximumExponent(att_value.size() + rightHandSide.att_value.size() - 1);
+	std :: vector <justAnInt> localValue(0);
+	while(localValue.size() < maximumExponent)
+		localValue.push_back(0);
 	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
-		att_value[i] = 0;							/* Reset our vector. Might be faster to make the copy the right size with full 0s and copy after */
-	while (att_value.size() < maximumExponent)
-		att_value.push_back(0);						/* Get the right size in our this */
-	if (localCopy.size() < rightHandSide.att_value.size()) {
-		for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-			for (unsigned int j = localCopy.size() ; j > 0 ;) {
-				--j;
-				att_value[i] += localCopy[j] * rightHandSide.att_value[i - j]; /* Careful, we move j HERE, in the first */
-			}
-		return *this;
-	}
-	for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-		for (unsigned int j = rightHandSide.att_value.size() ; j > 0 ;) {
-			--j;
-			att_value[i] += localCopy[i - j] * rightHandSide.att_value[j];
-		}
+		for (unsigned int j = 0 ; j < rightHandSide.att_value.size() ; ++j)
+			localValue[i + j] += att_value[i] * rightHandSide.att_value[j];
+	att_value = localValue;
 	return *this;
 }
 
 polynomeOfInts &polynomeOfInts :: operator*=	(const std :: vector <justAnInt> &rightHandSide) {
-	unsigned int maximumExponent(att_value.size() + rightHandSide.size());
-	std :: vector <justAnInt> localCopy(att_value); /* We will make a copy, just because it is easier */
+	unsigned int maximumExponent(att_value.size() + rightHandSide.size() - 1);
+	std :: vector <justAnInt> localValue(0);
+	while(localValue.size() < maximumExponent)
+		localValue.push_back(0);
 	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
-		att_value[i] = 0;							/* Reset our vector. Might be faster to make the copy the right size with full 0s and copy after */
-	while (att_value.size() < maximumExponent)
-		att_value.push_back(0);						/* Get the right size in our this */
-	if (localCopy.size() < rightHandSide.size()) {
-		for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-			for (unsigned int j = localCopy.size() ; j > 0 ;) {
-				--j;
-				att_value[i] += localCopy[j] * rightHandSide[i - j]; /* Careful, we move j HERE, in the first */
-			}
-		return *this;
-	}
-	for (unsigned int i = 0 ; i < maximumExponent ; ++i)
-		for (unsigned int j = rightHandSide.size() ; j > 0 ;) {
-			--j;
-			att_value[i] += localCopy[i - j] * rightHandSide[j];
-		}
+		for (unsigned int j = 0 ; j < rightHandSide.size() ; ++j)
+			localValue[i + j] += att_value[i] * rightHandSide[j];
+	att_value = localValue;
 	return *this;
 }
 
@@ -139,13 +117,14 @@ polynomeOfInts &polynomeOfInts :: operator/=	(const polynomeOfInts &rightHandSid
 	for (unsigned int i = 0 ; i <= localCopy.att_value.size() - rightHandSide.att_value.size() ; ++i) /* It basically is the size of the size difference */
 		att_value.push_back(0);
 	unsigned int currentExponent(att_value.size() - 1); 	/* To remember where we're at. It IS non zero, so non UB */
-	while (localCopy) {
-		polynomeOfInts temporary;
+	while (localCopy.att_value.size() >= rightHandSide.att_value.size()) {
+		polynomeOfInts temporary(0);
 		for (unsigned int i = 0 ; i < currentExponent ; ++i)
 			temporary.att_value.push_back(0);
 		temporary.att_value.back() = localCopy.att_value.back() / rightHandSide.att_value.back();
 		att_value[currentExponent] = temporary.att_value.back();
-		localCopy -= (temporary *= rightHandSide);
+		temporary *= rightHandSide;
+		localCopy -= temporary;
 		--currentExponent;
 		localCopy.att_value.pop_back(); 	/* We have made sure last element was zero */
 	}
@@ -155,29 +134,8 @@ polynomeOfInts &polynomeOfInts :: operator/=	(const polynomeOfInts &rightHandSid
 }
 
 polynomeOfInts &polynomeOfInts :: operator/=	(const std :: vector <justAnInt> &rightHandSide) {
-	if (att_value.size() < rightHandSide.size()) {
-		att_value.clear();	/* The answer is 0 */
-		att_value.push_back(0);
-		return *this;
-	}
-	polynomeOfInts localCopy(*this);
-	att_value.clear();
-	for (unsigned int i = 0 ; i <= localCopy.att_value.size() - rightHandSide.size() ; ++i) /* It basically is the size of the size difference */
-		att_value.push_back(0);
-	unsigned int currentExponent(att_value.size() - 1); 	/* To remember where we're at. It IS non zero, so non UB */
-	while (localCopy) {
-		polynomeOfInts temporary;
-		for (unsigned int i = 0 ; i < currentExponent ; ++i)
-			temporary.att_value.push_back(0);
-		temporary.att_value.back() = localCopy.att_value.back() / rightHandSide.back();
-		att_value[currentExponent] = temporary.att_value.back();
-		localCopy -= (temporary *= rightHandSide);
-		--currentExponent;
-		localCopy.att_value.pop_back(); 	/* We have made sure last element was zero */
-	}
-	while (!(att_value.back()))
-		att_value.pop_back();
-	return *this;
+	polynomeOfInts localCopy(rightHandSide);
+	return *this /= localCopy;
 }
 
 polynomeOfInts operator/ 						(const polynomeOfInts &leftHandSign, 				const polynomeOfInts &rightHandSide) {
@@ -199,11 +157,6 @@ polynomeOfInts operator% 						(const polynomeOfInts &leftHandSign, 				const po
 
 polynomeOfInts& polynomeOfInts :: operator= 	(const polynomeOfInts &rightHandSide) {
 	att_value = rightHandSide.att_value;
-	return *this;
-}
-
-polynomeOfInts& polynomeOfInts :: operator= 	(const std :: vector <justAnInt> &rightHandSide) {
-	att_value = rightHandSide;
 	return *this;
 }
 
@@ -408,7 +361,7 @@ std :: ostream &operator<<						(std :: ostream &out,				const polynomeOfInts &r
 	if (rightHandSide.att_value.size() > 1)
 		out << " + " << rightHandSide[1] << "x";
 	for (unsigned int i = 2 ; i < rightHandSide.att_value.size() ; ++i)
-		out << " + " << rightHandSide[i] << "x ^ " << i;
+		out << " + " << rightHandSide[i] << "x^" << i;
 	return out;
 }
 

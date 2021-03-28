@@ -28,6 +28,7 @@ public:
 	intModulo modInv										() const;
 	static void changeModulo								(const smallInt &);
 	static smallInt giveModulo								()			{return att_modulo;}
+	smallInt giveValue										() const {return att_value;}
 /* Operator + */
 	intModulo &operator+= 									(const intModulo &rightHandSide);
 	template<typename someType> intModulo &operator+= 		(const someType &rightHandSide);
@@ -105,7 +106,7 @@ template<typename someType> intModulo &intModulo :: operator+= (const someType &
 		bigInt localCopy(rightHandSide);
 		localCopy %= att_modulo; /* Making sure we do not overflow */
 		att_value += localCopy;
-		att_value %= att_modulo;	
+		att_value %= att_modulo;
 		return *this;		
 	}
 	int64_t tmpRightHandSide(rightHandSide);
@@ -122,8 +123,8 @@ intModulo intModulo :: operator+  (const intModulo leftHandSide, const intModulo
 }
 */
 template<typename someType> intModulo intModulo :: operator+ (const someType &rightHandSide) const {
-	intModulo localCopy(*this);
-	return localCopy += rightHandSide;
+	intModulo localCopy(rightHandSide);
+	return localCopy += *this;
 }
 
 template<typename someType> intModulo operator+ (const someType &leftHandSide, const intModulo rightHandSide) {
@@ -149,8 +150,8 @@ template<typename someType> intModulo intModulo :: operator- (const someType &ri
 }
 
 template<typename someType> intModulo operator- (const someType &leftHandSide, const intModulo rightHandSide) {
-	intModulo localCopy(rightHandSide);
-	return localCopy -= leftHandSide;
+	intModulo localCopy(leftHandSide);
+	return localCopy -= rightHandSide;
 }
 
 
@@ -204,8 +205,8 @@ template<typename someType> intModulo intModulo :: operator/ (const someType &ri
 }
 
 template<typename someType> intModulo operator/ (const someType &leftHandSide, const intModulo rightHandSide) {
-	intModulo localCopy(rightHandSide);
-	return localCopy /= leftHandSide;
+	intModulo localCopy(leftHandSide);
+	return localCopy /= rightHandSide;
 }
 
 template<typename someType> intModulo &intModulo :: operator=	(const someType &rightHandSide) {
@@ -272,10 +273,15 @@ template<typename someType> bool operator<=						(const someType &leftHandSide,	
 #endif /* _cplusplus >= 201907L */
 
 template<typename someType> intModulo :: intModulo				(const someType &rightHandSide) {
-	if (rightHandSide >= 0)
+	if (rightHandSide >= 0) {
 		att_value = rightHandSide % att_modulo;
-	else 
-		att_value = att_modulo - (rightHandSide % att_modulo);
+		return;
+	}
+	int64_t localCopy(rightHandSide);
+	do {
+		localCopy += att_modulo;
+	} while (localCopy < 0);
+	att_value = localCopy;
 }
 
 
