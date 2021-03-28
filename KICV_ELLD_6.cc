@@ -89,9 +89,9 @@ polynomeModulo operator- 						(const polynomeModulo &leftHandSign, 				const po
 
 polynomeModulo polynomeModulo :: operator-		() const {
 	polynomeModulo localValue(*this);
-	localValue.normalize();
 	for (unsigned int i = 0 ; i < att_modulo.size() ; ++i)
 		localValue[i] = -att_value[i];
+	localValue.normalize();
 	return localValue;
 }
 
@@ -358,7 +358,7 @@ polynomeModulo :: polynomeModulo				(const polynomeModulo &rightHandSide)			: at
 
 polynomeModulo :: polynomeModulo				(const std :: vector <intModulo> &rightHandSide): att_value(rightHandSide) {}
 
-polynomeModulo :: polynomeModulo				()												: att_value(0) {}
+polynomeModulo :: polynomeModulo				()												: att_value(1) {}
 
 
 polynomeModulo polynomeModulo :: quotient		(const polynomeModulo &rightHandSide) const {
@@ -382,12 +382,12 @@ polynomeModulo polynomeModulo :: quotient		(const polynomeModulo &rightHandSide)
 
 polynomeModulo polynomeModulo :: modInv			() const {
 	polynomeModulo inverse;
-	if (polynomeModulo :: extendedEuclidean(polynomeModulo(att_modulo), polynomeModulo(att_value), NULL, &inverse, true) != (smallInt) 1) {
+	if (polynomeModulo :: extendedEuclidean(polynomeModulo(att_modulo), polynomeModulo(att_value), NULL, &inverse, false) != (smallInt) 1) {
 		std :: cout << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl << std :: endl 
 				<< "The modulo you chose was not prime with that value, could not invert it" << std :: endl
 				<< "Now generating certificate, being the trace of the Extended Euclidean algorithm" << std :: endl;
 		polynomeModulo :: extendedEuclidean(polynomeModulo(att_modulo), polynomeModulo(att_value), NULL, NULL, true); /* Let us print our result */
-		exit(1);
+		return polynomeModulo();
 	}
 	return inverse;
 }
@@ -412,14 +412,17 @@ polynomeModulo polynomeModulo :: noNormaliseMultiply		(const polynomeModulo &rig
 void polynomeModulo :: normalize				() {
 	/* Let us first apply modulo */
 	polynomeModulo localValue(quotient(att_modulo));
-	if (!localValue)
+	if (!localValue) {
+		while (att_value.size() > 1 && !(att_value.back()))
+			att_value.pop_back();
 		return;
+	}
 	localValue.noNormaliseMultiply(att_modulo);
 	for (unsigned int i = 0 ; i < att_value.size() ; ++i)
 		att_value[i] -= localValue[i];
 
 	/* We are good to go. Erasing the useless 0s on top */
-	while (!(att_value.back()))
+	while (att_value.size() > 1 &&  !(att_value.back()))
 		att_value.pop_back();
 }
 
@@ -434,9 +437,9 @@ polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeMod
 	if (wantATrace) {
 		std :: cout.setf(std :: ios :: left); /* Text left justified */
 		std :: cout.width(30);	std :: cout << "a";
-		std :: cout.width(30);	std :: cout << "b";
 		std :: cout.width(30);	std :: cout << "u";
-		std :: cout.width(30);	std :: cout << "v" << std :: endl;
+		std :: cout.width(30);	std :: cout << "v";
+		std :: cout.width(30);	std :: cout << "q" << std :: endl;
 	}
 	if (!u0) {
 		needToClearU = true;
@@ -462,24 +465,22 @@ polynomeModulo polynomeModulo :: extendedEuclidean(polynomeModulo a, polynomeMod
 	*v0 = 0;
 	polynomeModulo u1(0);
 	polynomeModulo v1(1);
-				std :: cout << u1.att_value.size() << " and ofc " << v1.att_value.size() << std :: endl;
 	polynomeModulo tmp, quotient;
 	if (wantATrace) {
 		std :: cout.width(30); std :: cout << a.toString();
-		std :: cout.width(30); std :: cout << b.toString();
 		std :: cout.width(30); std :: cout << u0->toString();
-		std :: cout.width(30); std :: cout << v0->toString() << std :: endl;			
+		std :: cout.width(30); std :: cout << v0->toString();			
 	}
 	while (b) {
-		quotient = a.quotient(b);	std :: cout << "Quotient = " << quotient << std :: endl;
+		quotient = a.quotient(b);
 		tmp = b; b = a - quotient * b; a = tmp;
 		tmp = u1; u1 = *u0 - quotient * u1; *u0 = tmp;
 		tmp = v1; v1 = *v0 - quotient * v1; *v0 = tmp;
 		if (wantATrace) {
 			std :: cout.width(30); std :: cout << a.toString();
-			std :: cout.width(30); std :: cout << b.toString();
 			std :: cout.width(30); std :: cout << u0->toString();
-			std :: cout.width(30); std :: cout << v0->toString() << std :: endl;			
+			std :: cout.width(30); std :: cout << v0->toString();
+			std :: cout.width(30); std :: cout << quotient.toString() << std :: endl;
 		}
 	}
 	if (wantATrace)

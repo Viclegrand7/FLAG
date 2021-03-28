@@ -314,12 +314,12 @@ TEST_CASE("16: polynomeModulo, operator /") {
 	polynomeModulo secondPolynome({2, 1});
 	polynomeModulo thirdPolynome({19, 12, 34, 15}); /* {15, 0, 11} */
 	REQUIRE(thirdPolynome  == polynomeModulo{15, 0, 11});
-	std :: cout << 1 / secondPolynome << std :: endl;
-	REQUIRE((firstPolynome /= secondPolynome) == polynomeModulo{1, 3, 9});
-	REQUIRE((firstPolynome /= thirdPolynome) == polynomeModulo{3, 3, 15});
-	REQUIRE((thirdPolynome /= 1000) == polynomeModulo{-985, 0, 11});
-	REQUIRE(thirdPolynome  / secondPolynome == polynomeModulo{-987, 16, 11});
-	REQUIRE(thirdPolynome  / 25 == polynomeModulo{-1010, 0, 11});
+	REQUIRE(secondPolynome.modInv() == polynomeModulo{-3, -9, -5});
+	REQUIRE((firstPolynome /= secondPolynome) == polynomeModulo{-3, -9, -5} * firstPolynome);
+	REQUIRE(thirdPolynome.modInv() == polynomeModulo{0}); /* Erreur, non inversible */
+	REQUIRE(thirdPolynome  / secondPolynome == polynomeModulo{-3, -9, -5} * thirdPolynome);
+	REQUIRE(1 / secondPolynome == secondPolynome.modInv());
+	REQUIRE((1 / secondPolynome) * secondPolynome == polynomeModulo{1});
 }
 
 TEST_CASE("-1: Additionnal tests on ints") {
